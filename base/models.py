@@ -58,6 +58,15 @@ sizes = [
     ("xlarge","Xlarge"),
     ("xxlarge","XXlarge"),
 ]  
+
+gender_choices = [
+    ('men', 'Men'),
+    ('women', 'Women'),
+    ('girls', 'Girls'),
+    ('boys', 'Boys'),
+    ('all', 'All'),
+]
+
 class Item(models.Model):
     category = models.ForeignKey(Category, related_name='items', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
@@ -69,6 +78,7 @@ class Item(models.Model):
     quantity = models.PositiveIntegerField(default=1) 
     material = models.CharField(null=True, blank=True, max_length=50)
     size = models.CharField(choices=sizes, max_length=15, blank=True, null=True)            
+    gender = models.CharField(choices=gender_choices, max_length=10, default="all")
     
     class Meta:
         ordering = ('created_at',)
