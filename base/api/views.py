@@ -495,8 +495,10 @@ class GenderView(generics.ListAPIView):
     def get(self, request, gender, *args, **kwargs):
         try:
             items = Item.objects.filter(gender=gender)
+            unisex_items = Item.objects.filter(gender="all")
+            unisex_serializer = self.get_serializer(unisex_items, many=True)
             serializer = self.get_serializer(items, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({"items": serializer.data, "unisex_items":unisex_serializer.data}, status=status.HTTP_200_OK)
         except Item.DoesNotExist:
             return Response({'error':f"items for the {gender} not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
