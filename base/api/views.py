@@ -11,6 +11,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework import generics, status, pagination
 from django.db.models import Q
 from rest_framework.permissions import AllowAny
+from rest_framework.views import APIView
 from rest_framework.parsers import JSONParser
 import json
 from .email import send_update_email
@@ -455,3 +456,34 @@ class EditPost(generics.RetrieveUpdateAPIView):
         except Post.DoesNotExist:
             return Response({"error": "Post doesn't exist"}, status=status.HTTP_404_NOT_FOUND)
     
+class Checkout(APIView):
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        print(data)
+        required_fields = ["total_items", "total_cart_value", "shipping_charge", "grand_total"]
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return Response(
+                {"error": f"Missing required fields: {', '.join(missing_fields)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            user = User.objects.get(id=data.get('user_id'))
+            cart = Cart.objects.get(user=user)
+            cart.items.clear()
+            tcv = data.get('total_cart_value')
+            send_update_email(
+                subject=f"Order processed successfully",
+                recipient_list=[f"{user.email}"],
+                message=f"Dear {user.username}, your order for ₹ {tcv} has been processed succesfully!\nYour order will be delivered within 2-3 business days.\nThanks for shopping at NCOM !"
+            )
+            
+            return Response({"message": "Order processed successfully!"}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            print("Error during order processing:", e)
+            return Response(
+                {"error": "An error occurred while processing the order."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
