@@ -487,3 +487,17 @@ class Checkout(APIView):
                 {"error": "An error occurred while processing the order."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+            
+class GenderView(generics.ListAPIView):
+    queryset = Item.objects.all()
+    serializer_class = ItemSerializer
+    
+    def get(self, request, gender, *args, **kwargs):
+        try:
+            items = Item.objects.filter(gender=gender)
+            serializer = self.get_serializer(items, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Item.DoesNotExist:
+            return Response({'error':f"items for the {gender} not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': e}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

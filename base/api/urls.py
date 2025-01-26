@@ -30,6 +30,7 @@ urlpatterns = [
     path('edit_profile/<int:pk>', views.EditProfile.as_view()),
     path("edit_post/<int:id>", views.EditPost.as_view()),
     path("checkout", views.Checkout.as_view()),
+    path("gender/<str:gender>", views.GenderView.as_view()),
 
     path('notes', views.getnotes),
 ]
