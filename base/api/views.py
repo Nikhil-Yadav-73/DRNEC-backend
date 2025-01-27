@@ -152,6 +152,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
             raise NotFound(detail="User not found", code=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
     def put(self, request, id, *args, **kwargs):
         try:
             user = User.objects.get(id=id)
@@ -160,6 +161,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
             profile_data = json.loads(request.data.get('profile', '{}'))
             user_data = json.loads(request.data.get('user_data', '{}'))
 
+           
             if user_data:
                 user.username = user_data.get("username", user.username)
                 user.email = user_data.get("email", user.email)
@@ -183,15 +185,13 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
                     "profile": UserProfileSerializer(userprofile).data,
                     "user_data": UserSerializer(user).data
                 }, status=status.HTTP_200_OK)
-            
+
             return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
         except User.DoesNotExist:
             raise NotFound(detail="User not found", code=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 
 class SearchItems(generics.ListAPIView):
     queryset = Item.objects.all()
